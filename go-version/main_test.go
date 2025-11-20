@@ -236,20 +236,7 @@ func TestPersistence(t *testing.T) {
 	db1.ExecuteQuery("SPUSH stack val2")
 	db1.ExecuteQuery("QPUSH queue val3")
 	db1.ExecuteQuery("LPUSH_BACK slist val4")
-	db1.ExecuteQuery("LPUSH_FRONT dlist val5") // Will create SList by default if not specified?
-	// Wait, LPUSH_FRONT creates SList by default in main.go logic if not exists.
-	// To create DList, we need to manually inject or use a command that specifies type?
-	// main.go:164: if _, exists := db.structures[name]; !exists { db.structures[name] = ... TypeSList ... }
-	// So LPUSH_FRONT always creates SList if new.
-	// We can't create DList via commands in main.go!
-	// Wait, let's check main.go logic.
-	// Lines 135-157 (LPUSH_FRONT): if !exists -> create SList.
-	// So DList is effectively dead code in main.go CLI?
-	// But LoadFromFile can create DList!
-	// "STRUCTURE name DLIST"
-
-	// So we can test DList persistence by creating it manually or via LoadFromFile.
-	// Let's inject it manually for db1.
+	db1.ExecuteQuery("LPUSH_FRONT dlist val5")
 	db1.structures["dlist"] = &DataStructure{
 		structType: TypeDList,
 		data:       structures.NewDoublyList(),
@@ -297,11 +284,7 @@ func TestEmptyStructures(t *testing.T) {
 
 	// Print empty
 	if res := db.ExecuteQuery("PRINT arr"); !strings.Contains(res, "empty") && !strings.Contains(res, "Array") {
-		// Array might not say "empty" explicitly, but "Array [arr] (0 items)" or similar?
-		// Let's check array.go Print.
-		// It prints index/value. If empty, it prints nothing?
-		// array.go: Print: "Array [name] (len=0):" then loop.
-		// It doesn't print "(empty)".
+
 	}
 
 	if res := db.ExecuteQuery("PRINT stack"); !strings.Contains(res, "(empty)") {

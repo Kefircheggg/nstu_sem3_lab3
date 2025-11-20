@@ -12,9 +12,7 @@
 #include "../include/SinglyLinkedList.h"
 #include "../include/Stack.h"
 
-// ============================================================================
 // Array Tests
-// ============================================================================
 
 TEST(ArrayTest, BasicOperations) {
     Array arr;
@@ -134,9 +132,7 @@ TEST(ArrayTest, ResizeStress) {
     }
 }
 
-// ============================================================================
 // SinglyLinkedList Tests
-// ============================================================================
 
 TEST(SinglyLinkedListTest, PushBackFront) {
     SinglyLinkedList list;
@@ -230,9 +226,7 @@ TEST(SinglyLinkedListTest, SerializationBinary) {
     EXPECT_TRUE(list2.search("B"));
 }
 
-// ============================================================================
 // DoublyLinkedList Tests
-// ============================================================================
 
 TEST(DoublyLinkedListTest, PushBackFront) {
     DoublyLinkedList list;
@@ -326,9 +320,7 @@ TEST(DoublyLinkedListTest, SerializationBinary) {
     EXPECT_TRUE(list2.search("B"));
 }
 
-// ============================================================================
 // Stack Tests
-// ============================================================================
 
 TEST(StackTest, PushPop) {
     Stack stack;
@@ -387,9 +379,7 @@ TEST(StackTest, SerializationBinary) {
     EXPECT_EQ(stack2.top(), "A");
 }
 
-// ============================================================================
 // Queue Tests
-// ============================================================================
 
 TEST(QueueTest, EnqueueDequeue) {
     Queue q;
@@ -448,9 +438,7 @@ TEST(QueueTest, SerializationBinary) {
     EXPECT_EQ(q2.front(), "B");
 }
 
-// ============================================================================
 // HashTable Tests
-// ============================================================================
 
 TEST(HashTableTest, BasicOperations) {
     HashTable ht;
@@ -466,7 +454,6 @@ TEST(HashTableTest, BasicOperations) {
 }
 
 TEST(HashTableTest, Collisions) {
-    // Assuming simple hash, these might not collide but good to test multiple
     HashTable ht;
     for (int i = 0; i < 50; ++i) {
         ht.insert("key" + std::to_string(i), "val" + std::to_string(i));
@@ -513,9 +500,7 @@ TEST(HashTableTest, SerializationBinary) {
     EXPECT_EQ(ht2.get("k2"), "v2");
 }
 
-// ============================================================================
 // RBTree Tests
-// ============================================================================
 
 TEST(RBTreeTest, InsertSearch) {
     RBTree tree;

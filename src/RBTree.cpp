@@ -290,9 +290,6 @@ void RBTree::print() const {
     std::cout << std::endl;
 }
 
-// serializeHelper removed
-
-
 void RBTree::serialize(const std::string& filename) const {
     json j = json::array();
     std::function<void(Node*)> helper = [&](Node* node) {
@@ -354,12 +351,7 @@ void RBTree::deserializeBinary(const std::string& filename) {
         throw std::runtime_error("Could not open file for reading");
     }
     clear();
-    // This is tricky because insert balances the tree, so simple insertion might not restore exact
-    // structure if we just insert. But for BST/RBT, inserting elements in preorder (which serialize
-    // does) should restore the tree content. However, RBT structure (colors) might change if we
-    // just insert. But the task asks for serialization/deserialization of DATA. So restoring the
-    // content is enough.
-
+    
     while (file.peek() != EOF) {
         int len;
         file.read(reinterpret_cast<char*>(&len), sizeof(len));

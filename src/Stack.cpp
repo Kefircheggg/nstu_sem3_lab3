@@ -77,7 +77,6 @@ void Stack::deserialize(const std::string& filename) {
     json j;
     file >> j;
     clear();
-    // Iterate in reverse to push bottom elements first, restoring the stack order
     for (auto it = j.rbegin(); it != j.rend(); ++it) {
         push(it->get<std::string>());
     }
