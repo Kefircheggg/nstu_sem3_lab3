@@ -148,19 +148,19 @@ func TestExecuteQuery_Errors(t *testing.T) {
 		t.Error("Expected ERROR for unknown command")
 	}
 
-	// Type mismatch
+	// несоответствие типов
 	db.ExecuteQuery("MPUSH arr val")
 	if res := db.ExecuteQuery("SPUSH arr val"); !strings.Contains(res, "ERROR") {
 		t.Error("Expected ERROR for type mismatch (stack vs array)")
 	}
 
-	// Not found
+	// не найдено
 	if res := db.ExecuteQuery("MGET missing 0"); !strings.Contains(res, "ERROR") {
 		t.Error("Expected ERROR for missing structure")
 	}
 
-	// Missing arguments
-	if res := db.ExecuteQuery("MPUSH arr"); !strings.Contains(res, "ERROR") { // Need 3 args
+	// малов аргументов
+	if res := db.ExecuteQuery("MPUSH arr"); !strings.Contains(res, "ERROR") {
 		t.Error("Expected ERROR for MPUSH missing args")
 	}
 	if res := db.ExecuteQuery("MGET arr"); !strings.Contains(res, "ERROR") {
@@ -207,7 +207,6 @@ func TestExecuteQuery_Errors(t *testing.T) {
 }
 
 func TestPrintUsage(t *testing.T) {
-	// Capture stdout
 	oldStdout := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
@@ -230,7 +229,7 @@ func TestPersistence(t *testing.T) {
 	filename := "test_db.txt"
 	defer os.Remove(filename)
 
-	// 1. Create and populate
+	// 1. создать и заполнить
 	db1 := NewDatabase()
 	db1.ExecuteQuery("MPUSH arr val1")
 	db1.ExecuteQuery("SPUSH stack val2")
@@ -247,13 +246,13 @@ func TestPersistence(t *testing.T) {
 		t.Fatalf("SaveToFile failed: %v", err)
 	}
 
-	// 2. Load
+	// 2. загрузка
 	db2 := NewDatabase()
 	if err := db2.LoadFromFile(filename); err != nil {
 		t.Fatalf("LoadFromFile failed: %v", err)
 	}
 
-	// 3. Verify
+	// 3. проверка
 	if res := db2.ExecuteQuery("MGET arr 0"); res != "val1" {
 		t.Errorf("Expected val1, got %s", res)
 	}
@@ -274,15 +273,14 @@ func TestPersistence(t *testing.T) {
 func TestEmptyStructures(t *testing.T) {
 	db := NewDatabase()
 	db.ExecuteQuery("MPUSH arr val")
-	db.ExecuteQuery("MDEL arr 0") // Empty array
+	db.ExecuteQuery("MDEL arr 0")
 
 	db.ExecuteQuery("SPUSH stack val")
-	db.ExecuteQuery("SPOP stack") // Empty stack
+	db.ExecuteQuery("SPOP stack")
 
 	db.ExecuteQuery("QPUSH queue val")
-	db.ExecuteQuery("QPOP queue") // Empty queue
+	db.ExecuteQuery("QPOP queue")
 
-	// Print empty
 	if res := db.ExecuteQuery("PRINT arr"); !strings.Contains(res, "empty") && !strings.Contains(res, "Array") {
 
 	}
@@ -294,7 +292,6 @@ func TestEmptyStructures(t *testing.T) {
 		t.Error("Expected (empty) for queue")
 	}
 
-	// Persistence of empty structures
 	filename := "test_empty.db"
 	defer os.Remove(filename)
 
@@ -323,7 +320,6 @@ func TestMainFunc_Help(t *testing.T) {
 	resetFlags()
 	os.Args = []string{"cmd", "--help"}
 
-	// Capture stdout to avoid clutter
 	oldStdout := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
@@ -345,13 +341,11 @@ func TestMainFunc_Success(t *testing.T) {
 
 	resetFlags()
 	filename := "test_main_success.db"
-	// Ensure file doesn't exist or is empty
 	os.Remove(filename)
 	defer os.Remove(filename)
 
 	os.Args = []string{"cmd", "--file", filename, "--query", "MPUSH arr val"}
 
-	// Capture stdout
 	oldStdout := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
@@ -366,7 +360,6 @@ func TestMainFunc_Success(t *testing.T) {
 		t.Errorf("Expected OK, got %s", buf.String())
 	}
 
-	// Verify file created
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		t.Error("File was not created")
 	}

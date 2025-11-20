@@ -12,7 +12,7 @@
 #include "../include/SinglyLinkedList.h"
 #include "../include/Stack.h"
 
-// Array Tests
+// тесты массива
 
 TEST(ArrayTest, BasicOperations) {
     Array arr;
@@ -132,7 +132,7 @@ TEST(ArrayTest, ResizeStress) {
     }
 }
 
-// SinglyLinkedList Tests
+// тесты односвязного списка
 
 TEST(SinglyLinkedListTest, PushBackFront) {
     SinglyLinkedList list;
@@ -155,7 +155,7 @@ TEST(SinglyLinkedListTest, PopBack) {
     list.popBack();
     EXPECT_EQ(list.length(), 0);
 
-    list.popBack();  // Should not crash
+    list.popBack();  // не должно крашнуться
 }
 
 TEST(SinglyLinkedListTest, PopFront) {
@@ -170,7 +170,7 @@ TEST(SinglyLinkedListTest, PopFront) {
     list.popFront();
     EXPECT_EQ(list.length(), 0);
 
-    list.popFront();  // Should not crash
+    list.popFront();  // не должно крашнуться
 }
 
 TEST(SinglyLinkedListTest, Remove) {
@@ -179,18 +179,18 @@ TEST(SinglyLinkedListTest, Remove) {
     list.pushBack("B");
     list.pushBack("C");
 
-    list.remove("B");  // Middle
+    list.remove("B");  // серединка
     EXPECT_EQ(list.length(), 2);
     EXPECT_FALSE(list.search("B"));
 
-    list.remove("A");  // Head
+    list.remove("A");  // голова
     EXPECT_EQ(list.length(), 1);
     EXPECT_FALSE(list.search("A"));
 
-    list.remove("C");  // Tail
+    list.remove("C");  // хвост
     EXPECT_EQ(list.length(), 0);
 
-    list.remove("NonExistent");  // Should not crash
+    list.remove("NonExistent");  // не должно крашнуться
 }
 
 TEST(SinglyLinkedListTest, Clear) {
@@ -226,7 +226,7 @@ TEST(SinglyLinkedListTest, SerializationBinary) {
     EXPECT_TRUE(list2.search("B"));
 }
 
-// DoublyLinkedList Tests
+// тесты двусвязного списка
 
 TEST(DoublyLinkedListTest, PushBackFront) {
     DoublyLinkedList list;
@@ -249,7 +249,7 @@ TEST(DoublyLinkedListTest, PopBack) {
     list.popBack();
     EXPECT_EQ(list.length(), 0);
 
-    list.popBack();  // Should not crash
+    list.popBack();  
 }
 
 TEST(DoublyLinkedListTest, PopFront) {
@@ -264,7 +264,7 @@ TEST(DoublyLinkedListTest, PopFront) {
     list.popFront();
     EXPECT_EQ(list.length(), 0);
 
-    list.popFront();  // Should not crash
+    list.popFront();  
 }
 
 TEST(DoublyLinkedListTest, Remove) {
@@ -273,18 +273,18 @@ TEST(DoublyLinkedListTest, Remove) {
     list.pushBack("B");
     list.pushBack("C");
 
-    list.remove("B");  // Middle
+    list.remove("B");  // серединка
     EXPECT_EQ(list.length(), 2);
     EXPECT_FALSE(list.search("B"));
 
-    list.remove("A");  // Head
+    list.remove("A");  // голова
     EXPECT_EQ(list.length(), 1);
     EXPECT_FALSE(list.search("A"));
 
-    list.remove("C");  // Tail
+    list.remove("C");  // хвосты
     EXPECT_EQ(list.length(), 0);
 
-    list.remove("NonExistent");  // Should not crash
+    list.remove("NonExistent");  
 }
 
 TEST(DoublyLinkedListTest, Clear) {
@@ -320,7 +320,7 @@ TEST(DoublyLinkedListTest, SerializationBinary) {
     EXPECT_TRUE(list2.search("B"));
 }
 
-// Stack Tests
+// тесты стека
 
 TEST(StackTest, PushPop) {
     Stack stack;
@@ -336,7 +336,7 @@ TEST(StackTest, PushPop) {
     stack.pop();
     EXPECT_TRUE(stack.isEmpty());
 
-    stack.pop();  // Should not crash
+    stack.pop();  
 }
 
 TEST(StackTest, Exceptions) {
@@ -379,7 +379,7 @@ TEST(StackTest, SerializationBinary) {
     EXPECT_EQ(stack2.top(), "A");
 }
 
-// Queue Tests
+// тесты очереди
 
 TEST(QueueTest, EnqueueDequeue) {
     Queue q;
@@ -395,7 +395,7 @@ TEST(QueueTest, EnqueueDequeue) {
     q.dequeue();
     EXPECT_TRUE(q.isEmpty());
 
-    q.dequeue();  // Should not crash
+    q.dequeue();  
 }
 
 TEST(QueueTest, Exceptions) {
@@ -438,7 +438,7 @@ TEST(QueueTest, SerializationBinary) {
     EXPECT_EQ(q2.front(), "B");
 }
 
-// HashTable Tests
+// тесты хэш таблиц 
 
 TEST(HashTableTest, BasicOperations) {
     HashTable ht;
@@ -446,7 +446,7 @@ TEST(HashTableTest, BasicOperations) {
     EXPECT_TRUE(ht.contains("key1"));
     EXPECT_EQ(ht.get("key1"), "val1");
 
-    ht.insert("key1", "val2");  // Update
+    ht.insert("key1", "val2");  
     EXPECT_EQ(ht.get("key1"), "val2");
 
     ht.remove("key1");
@@ -500,7 +500,7 @@ TEST(HashTableTest, SerializationBinary) {
     EXPECT_EQ(ht2.get("k2"), "v2");
 }
 
-// RBTree Tests
+// КЧД тесты
 
 TEST(RBTreeTest, InsertSearch) {
     RBTree tree;
@@ -587,19 +587,19 @@ TEST(RBTreeTest, Print) {
 
 TEST(RBTreeTest, StressTest) {
     RBTree tree;
-    // Insert many nodes to trigger rebalancing
+    
     for (int i = 0; i < 50; ++i) {
         tree.insert(std::to_string(i));
     }
     EXPECT_EQ(tree.size(), 50);
 
-    // Remove some nodes
+    // удаляем часть
     for (int i = 0; i < 20; ++i) {
         tree.remove(std::to_string(i));
     }
     EXPECT_EQ(tree.size(), 30);
 
-    // Check remaining
+    // проверка что осталось
     for (int i = 20; i < 50; ++i) {
         EXPECT_TRUE(tree.search(std::to_string(i)));
     }
