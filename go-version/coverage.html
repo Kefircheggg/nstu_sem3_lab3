@@ -1,0 +1,1091 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>dbms: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">dbms/main.go (85.1%)</option>
+				
+				<option value="file1">dbms/structures/array.go (94.1%)</option>
+				
+				<option value="file2">dbms/structures/list.go (83.3%)</option>
+				
+				<option value="file3">dbms/structures/queue.go (89.7%)</option>
+				
+				<option value="file4">dbms/structures/stack.go (80.8%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "bufio"
+        "dbms/structures"
+        "flag"
+        "fmt"
+        "os"
+        "strconv"
+        "strings"
+)
+
+// StructureType - тип структуры данных
+type StructureType int
+
+const (
+        TypeArray StructureType = iota
+        TypeSList
+        TypeDList
+        TypeStack
+        TypeQueue
+)
+
+// DataStructure - обертка для любой структуры данных
+type DataStructure struct {
+        structType StructureType
+        data       interface{}
+}
+
+// Database - база данных со структурами
+type Database struct {
+        structures map[string]*DataStructure
+}
+
+// NewDatabase создает новую базу данных
+func NewDatabase() *Database <span class="cov8" title="1">{
+        return &amp;Database{
+                structures: make(map[string]*DataStructure),
+        }
+}</span>
+
+// ExecuteQuery выполняет SQL-подобный запрос
+func (db *Database) ExecuteQuery(query string) string <span class="cov8" title="1">{
+        tokens := strings.Fields(query)
+        if len(tokens) == 0 </span><span class="cov8" title="1">{
+                return "ERROR: Empty query"
+        }</span>
+
+        <span class="cov8" title="1">command := tokens[0]
+
+        // MPUSH - добавить элемент в массив
+        if command == "MPUSH" &amp;&amp; len(tokens) &gt;= 3 </span><span class="cov8" title="1">{
+                name := tokens[1]
+                value := tokens[2]
+
+                if _, exists := db.structures[name]; !exists </span><span class="cov8" title="1">{
+                        db.structures[name] = &amp;DataStructure{
+                                structType: TypeArray,
+                                data:       structures.NewArray(),
+                        }
+                }</span>
+
+                <span class="cov8" title="1">if db.structures[name].structType != TypeArray </span><span class="cov0" title="0">{
+                        return "ERROR: " + name + " is not an array"
+                }</span>
+
+                <span class="cov8" title="1">arr := db.structures[name].data.(*structures.Array)
+                arr.Push(value)
+                return "OK"</span>
+        }
+
+        // MGET - получить элемент массива
+        <span class="cov8" title="1">if command == "MGET" &amp;&amp; len(tokens) &gt;= 3 </span><span class="cov8" title="1">{
+                name := tokens[1]
+                index, err := strconv.Atoi(tokens[2])
+                if err != nil </span><span class="cov8" title="1">{
+                        return "ERROR: Invalid index"
+                }</span>
+
+                <span class="cov8" title="1">ds, exists := db.structures[name]
+                if !exists </span><span class="cov8" title="1">{
+                        return "ERROR: Array " + name + " not found"
+                }</span>
+                <span class="cov8" title="1">if ds.structType != TypeArray </span><span class="cov0" title="0">{
+                        return "ERROR: " + name + " is not an array"
+                }</span>
+
+                <span class="cov8" title="1">arr := ds.data.(*structures.Array)
+                if val, ok := arr.Get(index); ok </span><span class="cov8" title="1">{
+                        return val
+                }</span>
+                <span class="cov8" title="1">return "ERROR: Index out of bounds"</span>
+        }
+
+        // MDEL - удалить элемент массива
+        <span class="cov8" title="1">if command == "MDEL" &amp;&amp; len(tokens) &gt;= 3 </span><span class="cov8" title="1">{
+                name := tokens[1]
+                index, err := strconv.Atoi(tokens[2])
+                if err != nil </span><span class="cov0" title="0">{
+                        return "ERROR: Invalid index"
+                }</span>
+
+                <span class="cov8" title="1">ds, exists := db.structures[name]
+                if !exists </span><span class="cov0" title="0">{
+                        return "ERROR: Array " + name + " not found"
+                }</span>
+                <span class="cov8" title="1">if ds.structType != TypeArray </span><span class="cov0" title="0">{
+                        return "ERROR: " + name + " is not an array"
+                }</span>
+
+                <span class="cov8" title="1">arr := ds.data.(*structures.Array)
+                if arr.Delete(index) </span><span class="cov8" title="1">{
+                        return "OK"
+                }</span>
+                <span class="cov0" title="0">return "ERROR: Index out of bounds"</span>
+        }
+
+        // MLEN - длина массива
+        <span class="cov8" title="1">if command == "MLEN" &amp;&amp; len(tokens) &gt;= 2 </span><span class="cov8" title="1">{
+                name := tokens[1]
+
+                ds, exists := db.structures[name]
+                if !exists </span><span class="cov0" title="0">{
+                        return "ERROR: Array " + name + " not found"
+                }</span>
+                <span class="cov8" title="1">if ds.structType != TypeArray </span><span class="cov0" title="0">{
+                        return "ERROR: " + name + " is not an array"
+                }</span>
+
+                <span class="cov8" title="1">arr := ds.data.(*structures.Array)
+                return strconv.Itoa(arr.Len())</span>
+        }
+
+        // LPUSH_FRONT - добавить в начало списка
+        <span class="cov8" title="1">if command == "LPUSH_FRONT" &amp;&amp; len(tokens) &gt;= 3 </span><span class="cov8" title="1">{
+                name := tokens[1]
+                value := tokens[2]
+
+                if _, exists := db.structures[name]; !exists </span><span class="cov8" title="1">{
+                        db.structures[name] = &amp;DataStructure{
+                                structType: TypeSList,
+                                data:       structures.NewSinglyList(),
+                        }
+                }</span>
+
+                <span class="cov8" title="1">ds := db.structures[name]
+                if ds.structType == TypeSList </span><span class="cov8" title="1">{
+                        list := ds.data.(*structures.SinglyList)
+                        list.PushFront(value)
+                        return "OK"
+                }</span> else<span class="cov0" title="0"> if ds.structType == TypeDList </span><span class="cov0" title="0">{
+                        list := ds.data.(*structures.DoublyList)
+                        list.PushFront(value)
+                        return "OK"
+                }</span>
+                <span class="cov0" title="0">return "ERROR: " + name + " is not a list"</span>
+        }
+
+        // LPUSH_BACK - добавить в конец списка
+        <span class="cov8" title="1">if command == "LPUSH_BACK" &amp;&amp; len(tokens) &gt;= 3 </span><span class="cov8" title="1">{
+                name := tokens[1]
+                value := tokens[2]
+
+                if _, exists := db.structures[name]; !exists </span><span class="cov8" title="1">{
+                        db.structures[name] = &amp;DataStructure{
+                                structType: TypeSList,
+                                data:       structures.NewSinglyList(),
+                        }
+                }</span>
+
+                <span class="cov8" title="1">ds := db.structures[name]
+                if ds.structType == TypeSList </span><span class="cov8" title="1">{
+                        list := ds.data.(*structures.SinglyList)
+                        list.PushBack(value)
+                        return "OK"
+                }</span> else<span class="cov8" title="1"> if ds.structType == TypeDList </span><span class="cov8" title="1">{
+                        list := ds.data.(*structures.DoublyList)
+                        list.PushBack(value)
+                        return "OK"
+                }</span>
+                <span class="cov0" title="0">return "ERROR: " + name + " is not a list"</span>
+        }
+
+        // LGET - получить элемент списка
+        <span class="cov8" title="1">if command == "LGET" &amp;&amp; len(tokens) &gt;= 3 </span><span class="cov8" title="1">{
+                name := tokens[1]
+                index, err := strconv.Atoi(tokens[2])
+                if err != nil </span><span class="cov0" title="0">{
+                        return "ERROR: Invalid index"
+                }</span>
+
+                <span class="cov8" title="1">ds, exists := db.structures[name]
+                if !exists </span><span class="cov0" title="0">{
+                        return "ERROR: List " + name + " not found"
+                }</span>
+
+                <span class="cov8" title="1">if ds.structType == TypeSList </span><span class="cov8" title="1">{
+                        list := ds.data.(*structures.SinglyList)
+                        if val, ok := list.Get(index); ok </span><span class="cov8" title="1">{
+                                return val
+                        }</span>
+                } else<span class="cov8" title="1"> if ds.structType == TypeDList </span><span class="cov8" title="1">{
+                        list := ds.data.(*structures.DoublyList)
+                        if val, ok := list.Get(index); ok </span><span class="cov8" title="1">{
+                                return val
+                        }</span>
+                } else<span class="cov0" title="0"> {
+                        return "ERROR: " + name + " is not a list"
+                }</span>
+                <span class="cov0" title="0">return "ERROR: Index out of bounds"</span>
+        }
+
+        // LDEL - удалить элемент списка
+        <span class="cov8" title="1">if command == "LDEL" &amp;&amp; len(tokens) &gt;= 3 </span><span class="cov8" title="1">{
+                name := tokens[1]
+                value := tokens[2]
+
+                ds, exists := db.structures[name]
+                if !exists </span><span class="cov0" title="0">{
+                        return "ERROR: List " + name + " not found"
+                }</span>
+
+                <span class="cov8" title="1">if ds.structType == TypeSList </span><span class="cov8" title="1">{
+                        list := ds.data.(*structures.SinglyList)
+                        if list.Delete(value) </span><span class="cov8" title="1">{
+                                return "OK"
+                        }</span>
+                } else<span class="cov0" title="0"> if ds.structType == TypeDList </span><span class="cov0" title="0">{
+                        list := ds.data.(*structures.DoublyList)
+                        if list.Delete(value) </span><span class="cov0" title="0">{
+                                return "OK"
+                        }</span>
+                } else<span class="cov0" title="0"> {
+                        return "ERROR: " + name + " is not a list"
+                }</span>
+                <span class="cov0" title="0">return "ERROR: Value not found"</span>
+        }
+
+        // SPUSH - добавить в стек
+        <span class="cov8" title="1">if command == "SPUSH" &amp;&amp; len(tokens) &gt;= 3 </span><span class="cov8" title="1">{
+                name := tokens[1]
+                value := tokens[2]
+
+                if _, exists := db.structures[name]; !exists </span><span class="cov8" title="1">{
+                        db.structures[name] = &amp;DataStructure{
+                                structType: TypeStack,
+                                data:       structures.NewStack(),
+                        }
+                }</span>
+
+                <span class="cov8" title="1">ds := db.structures[name]
+                if ds.structType != TypeStack </span><span class="cov8" title="1">{
+                        return "ERROR: " + name + " is not a stack"
+                }</span>
+
+                <span class="cov8" title="1">stack := ds.data.(*structures.Stack)
+                return stack.Push(value)</span>
+        }
+
+        // SPOP - извлечь из стека
+        <span class="cov8" title="1">if command == "SPOP" &amp;&amp; len(tokens) &gt;= 2 </span><span class="cov8" title="1">{
+                name := tokens[1]
+
+                ds, exists := db.structures[name]
+                if !exists </span><span class="cov0" title="0">{
+                        return "ERROR: Stack " + name + " not found"
+                }</span>
+                <span class="cov8" title="1">if ds.structType != TypeStack </span><span class="cov0" title="0">{
+                        return "ERROR: " + name + " is not a stack"
+                }</span>
+
+                <span class="cov8" title="1">stack := ds.data.(*structures.Stack)
+                if val, ok := stack.Pop(); ok </span><span class="cov8" title="1">{
+                        return val
+                }</span>
+                <span class="cov8" title="1">return "ERROR: Stack is empty"</span>
+        }
+
+        // QPUSH - добавить в очередь
+        <span class="cov8" title="1">if command == "QPUSH" &amp;&amp; len(tokens) &gt;= 3 </span><span class="cov8" title="1">{
+                name := tokens[1]
+                value := tokens[2]
+
+                if _, exists := db.structures[name]; !exists </span><span class="cov8" title="1">{
+                        db.structures[name] = &amp;DataStructure{
+                                structType: TypeQueue,
+                                data:       structures.NewQueue(),
+                        }
+                }</span>
+
+                <span class="cov8" title="1">ds := db.structures[name]
+                if ds.structType != TypeQueue </span><span class="cov0" title="0">{
+                        return "ERROR: " + name + " is not a queue"
+                }</span>
+
+                <span class="cov8" title="1">queue := ds.data.(*structures.Queue)
+                return queue.Push(value)</span>
+        }
+
+        // QPOP - извлечь из очереди
+        <span class="cov8" title="1">if command == "QPOP" &amp;&amp; len(tokens) &gt;= 2 </span><span class="cov8" title="1">{
+                name := tokens[1]
+
+                ds, exists := db.structures[name]
+                if !exists </span><span class="cov0" title="0">{
+                        return "ERROR: Queue " + name + " not found"
+                }</span>
+                <span class="cov8" title="1">if ds.structType != TypeQueue </span><span class="cov0" title="0">{
+                        return "ERROR: " + name + " is not a queue"
+                }</span>
+
+                <span class="cov8" title="1">queue := ds.data.(*structures.Queue)
+                if val, ok := queue.Pop(); ok </span><span class="cov8" title="1">{
+                        return val
+                }</span>
+                <span class="cov8" title="1">return "ERROR: Queue is empty"</span>
+        }
+
+        // PRINT - вывести структуру на экран
+        <span class="cov8" title="1">if command == "PRINT" &amp;&amp; len(tokens) &gt;= 2 </span><span class="cov8" title="1">{
+                name := tokens[1]
+
+                ds, exists := db.structures[name]
+                if !exists </span><span class="cov0" title="0">{
+                        return "ERROR: Structure " + name + " not found"
+                }</span>
+
+                <span class="cov8" title="1">switch ds.structType </span>{
+                case TypeArray:<span class="cov8" title="1">
+                        return ds.data.(*structures.Array).Print(name)</span>
+                case TypeSList:<span class="cov0" title="0">
+                        return ds.data.(*structures.SinglyList).Print(name)</span>
+                case TypeDList:<span class="cov0" title="0">
+                        return ds.data.(*structures.DoublyList).Print(name)</span>
+                case TypeStack:<span class="cov8" title="1">
+                        return ds.data.(*structures.Stack).Print(name)</span>
+                case TypeQueue:<span class="cov8" title="1">
+                        return ds.data.(*structures.Queue).Print(name)</span>
+                }
+        }
+
+        <span class="cov8" title="1">return "ERROR: Unknown command or invalid syntax"</span>
+}
+
+// SaveToFile сохраняет базу данных в файл
+func (db *Database) SaveToFile(filename string) error <span class="cov8" title="1">{
+        file, err := os.Create(filename)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">defer file.Close()
+
+        writer := bufio.NewWriter(file)
+
+        for name, ds := range db.structures </span><span class="cov8" title="1">{
+                // Записываем тип структуры
+                structTypeName := ""
+                switch ds.structType </span>{
+                case TypeArray:<span class="cov8" title="1">
+                        structTypeName = "ARRAY"</span>
+                case TypeSList:<span class="cov8" title="1">
+                        structTypeName = "SLIST"</span>
+                case TypeDList:<span class="cov8" title="1">
+                        structTypeName = "DLIST"</span>
+                case TypeStack:<span class="cov8" title="1">
+                        structTypeName = "STACK"</span>
+                case TypeQueue:<span class="cov8" title="1">
+                        structTypeName = "QUEUE"</span>
+                }
+
+                <span class="cov8" title="1">fmt.Fprintf(writer, "STRUCTURE %s %s\n", name, structTypeName)
+
+                // Записываем данные
+                switch ds.structType </span>{
+                case TypeArray:<span class="cov8" title="1">
+                        arr := ds.data.(*structures.Array)
+                        for _, val := range arr.Values() </span><span class="cov8" title="1">{
+                                fmt.Fprintf(writer, "MPUSH %s %s\n", name, val)
+                        }</span>
+                case TypeSList:<span class="cov8" title="1">
+                        list := ds.data.(*structures.SinglyList)
+                        for _, val := range list.Values() </span><span class="cov8" title="1">{
+                                fmt.Fprintf(writer, "LPUSH_BACK %s %s\n", name, val)
+                        }</span>
+                case TypeDList:<span class="cov8" title="1">
+                        list := ds.data.(*structures.DoublyList)
+                        for _, val := range list.Values() </span><span class="cov8" title="1">{
+                                fmt.Fprintf(writer, "LPUSH_BACK %s %s\n", name, val)
+                        }</span>
+                case TypeStack:<span class="cov8" title="1">
+                        // Для стека нужно сохранить в обратном порядке
+                        stack := ds.data.(*structures.Stack)
+                        items := stack.Values()
+                        // Записываем в обратном порядке
+                        for i := len(items) - 1; i &gt;= 0; i-- </span><span class="cov8" title="1">{
+                                fmt.Fprintf(writer, "SPUSH %s %s\n", name, items[i])
+                        }</span>
+                case TypeQueue:<span class="cov8" title="1">
+                        queue := ds.data.(*structures.Queue)
+                        for _, val := range queue.Values() </span><span class="cov8" title="1">{
+                                fmt.Fprintf(writer, "QPUSH %s %s\n", name, val)
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">return writer.Flush()</span>
+}
+
+// LoadFromFile загружает базу данных из файла
+func (db *Database) LoadFromFile(filename string) error <span class="cov8" title="1">{
+        file, err := os.Open(filename)
+        if err != nil </span><span class="cov8" title="1">{
+                if os.IsNotExist(err) </span><span class="cov8" title="1">{
+                        return nil // Файл не существует - это нормально
+                }</span>
+                <span class="cov0" title="0">return err</span>
+        }
+        <span class="cov8" title="1">defer file.Close()
+
+        scanner := bufio.NewScanner(file)
+        for scanner.Scan() </span><span class="cov8" title="1">{
+                line := strings.TrimSpace(scanner.Text())
+                if line == "" </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov8" title="1">tokens := strings.Fields(line)
+                if len(tokens) &lt; 3 </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov8" title="1">if tokens[0] == "STRUCTURE" </span><span class="cov8" title="1">{
+                        name := tokens[1]
+                        structType := tokens[2]
+
+                        switch structType </span>{
+                        case "ARRAY":<span class="cov8" title="1">
+                                db.structures[name] = &amp;DataStructure{
+                                        structType: TypeArray,
+                                        data:       structures.NewArray(),
+                                }</span>
+                        case "SLIST":<span class="cov8" title="1">
+                                db.structures[name] = &amp;DataStructure{
+                                        structType: TypeSList,
+                                        data:       structures.NewSinglyList(),
+                                }</span>
+                        case "DLIST":<span class="cov8" title="1">
+                                db.structures[name] = &amp;DataStructure{
+                                        structType: TypeDList,
+                                        data:       structures.NewDoublyList(),
+                                }</span>
+                        case "STACK":<span class="cov8" title="1">
+                                db.structures[name] = &amp;DataStructure{
+                                        structType: TypeStack,
+                                        data:       structures.NewStack(),
+                                }</span>
+                        case "QUEUE":<span class="cov8" title="1">
+                                db.structures[name] = &amp;DataStructure{
+                                        structType: TypeQueue,
+                                        data:       structures.NewQueue(),
+                                }</span>
+                        }
+                } else<span class="cov8" title="1"> {
+                        // Выполняем команду
+                        db.ExecuteQuery(line)
+                }</span>
+        }
+
+        <span class="cov8" title="1">return scanner.Err()</span>
+}
+
+func printUsage() <span class="cov8" title="1">{
+        fmt.Println("Использование:")
+        fmt.Println("  ./dbms --file &lt;filename&gt; --query '&lt;command&gt;'")
+        fmt.Println()
+        fmt.Println("Команды:")
+        fmt.Println()
+        fmt.Println("  Массив (Array):")
+        fmt.Println("    MPUSH myarray value      - добавить элемент в массив")
+        fmt.Println("    MGET myarray 0           - получить элемент по индексу")
+        fmt.Println("    MDEL myarray 0           - удалить элемент по индексу")
+        fmt.Println("    MLEN myarray             - получить длину массива")
+        fmt.Println("    PRINT myarray            - вывести массив")
+        fmt.Println()
+        fmt.Println("  Односвязный/Двусвязный список (Linked List):")
+        fmt.Println("    LPUSH_FRONT mylist value - добавить элемент в начало")
+        fmt.Println("    LPUSH_BACK mylist value  - добавить элемент в конец")
+        fmt.Println("    LGET mylist 0            - получить элемент по индексу")
+        fmt.Println("    LDEL mylist value        - удалить элемент по значению")
+        fmt.Println("    PRINT mylist             - вывести список")
+        fmt.Println()
+        fmt.Println("  Стек (Stack - LIFO):")
+        fmt.Println("    SPUSH mystack item       - добавить элемент в стек")
+        fmt.Println("    SPOP mystack             - извлечь элемент из стека")
+        fmt.Println("    PRINT mystack            - вывести стек")
+        fmt.Println()
+        fmt.Println("  Очередь (Queue - FIFO):")
+        fmt.Println("    QPUSH myqueue element    - добавить элемент в очередь")
+        fmt.Println("    QPOP myqueue             - извлечь элемент из очереди")
+        fmt.Println("    PRINT myqueue            - вывести очередь")
+        fmt.Println()
+        fmt.Println("Примеры использования:")
+        fmt.Println("  # Массив")
+        fmt.Println("  ./dbms --file data.db --query 'MPUSH arr apple'")
+        fmt.Println("  ./dbms --file data.db --query 'MGET arr 0'")
+        fmt.Println("  ./dbms --file data.db --query 'MLEN arr'")
+        fmt.Println()
+        fmt.Println("  # Список")
+        fmt.Println("  ./dbms --file data.db --query 'LPUSH_BACK list item1'")
+        fmt.Println("  ./dbms --file data.db --query 'LPUSH_FRONT list item0'")
+        fmt.Println("  ./dbms --file data.db --query 'LGET list 0'")
+        fmt.Println()
+        fmt.Println("  # Стек (LIFO)")
+        fmt.Println("  ./dbms --file data.db --query 'SPUSH stack A'")
+        fmt.Println("  ./dbms --file data.db --query 'SPUSH stack B'")
+        fmt.Println("  ./dbms --file data.db --query 'SPOP stack'  # Вернёт B")
+        fmt.Println()
+        fmt.Println("  # Очередь (FIFO)")
+        fmt.Println("  ./dbms --file data.db --query 'QPUSH queue X'")
+        fmt.Println("  ./dbms --file data.db --query 'QPUSH queue Y'")
+        fmt.Println("  ./dbms --file data.db --query 'QPOP queue'  # Вернёт X")
+        fmt.Println()
+        fmt.Println("  # Вывод любой структуры")
+        fmt.Println("  ./dbms --file data.db --query 'PRINT arr'")
+        fmt.Println("  ./dbms --file data.db --query 'PRINT stack'")
+}</span>
+
+func main() <span class="cov8" title="1">{
+        filename := flag.String("file", "", "Файл для хранения данных")
+        query := flag.String("query", "", "SQL-подобная команда для выполнения")
+        help := flag.Bool("help", false, "Показать справку")
+
+        flag.Parse()
+
+        if *help </span><span class="cov8" title="1">{
+                printUsage()
+                return
+        }</span>
+
+        <span class="cov8" title="1">if *filename == "" || *query == "" </span><span class="cov0" title="0">{
+                fmt.Println("ERROR: Missing required parameters")
+                fmt.Println()
+                printUsage()
+                os.Exit(1)
+        }</span>
+
+        // Создание БД
+        <span class="cov8" title="1">db := NewDatabase()
+
+        // Загрузка данных из файла
+        if err := db.LoadFromFile(*filename); err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintf(os.Stderr, "ERROR: Cannot load file: %v\n", err)
+                os.Exit(1)
+        }</span>
+
+        // Выполнение запроса
+        <span class="cov8" title="1">result := db.ExecuteQuery(*query)
+
+        // Сохранение данных в файл
+        if err := db.SaveToFile(*filename); err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintf(os.Stderr, "ERROR: Cannot save file: %v\n", err)
+                os.Exit(1)
+        }</span>
+
+        // Вывод результата
+        <span class="cov8" title="1">fmt.Print(result)
+        // Добавляем перевод строки только если результат не заканчивается на него
+        if len(result) &gt; 0 &amp;&amp; result[len(result)-1] != '\n' </span><span class="cov8" title="1">{
+                fmt.Println()
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package structures
+
+import "strconv"
+
+// Array - динамический массив
+type Array struct {
+        data []string
+}
+
+// NewArray создает новый массив
+func NewArray() *Array <span class="cov8" title="1">{
+        return &amp;Array{
+                data: make([]string, 0),
+        }
+}</span>
+
+// Push добавляет элемент в конец массива
+func (a *Array) Push(value string) <span class="cov8" title="1">{
+        a.data = append(a.data, value)
+}</span>
+
+// Get возвращает элемент по индексу
+func (a *Array) Get(index int) (string, bool) <span class="cov8" title="1">{
+        if index &lt; 0 || index &gt;= len(a.data) </span><span class="cov8" title="1">{
+                return "", false
+        }</span>
+        <span class="cov8" title="1">return a.data[index], true</span>
+}
+
+// Delete удаляет элемент по индексу
+func (a *Array) Delete(index int) bool <span class="cov8" title="1">{
+        if index &lt; 0 || index &gt;= len(a.data) </span><span class="cov8" title="1">{
+                return false
+        }</span>
+        <span class="cov8" title="1">a.data = append(a.data[:index], a.data[index+1:]...)
+        return true</span>
+}
+
+// Len возвращает длину массива
+func (a *Array) Len() int <span class="cov8" title="1">{
+        return len(a.data)
+}</span>
+
+// Values возвращает все элементы массива
+func (a *Array) Values() []string <span class="cov8" title="1">{
+        return a.data
+}</span>
+
+// Print выводит массив
+func (a *Array) Print(name string) string <span class="cov8" title="1">{
+        result := "Array [" + name + "] (size: " + strconv.Itoa(len(a.data)) + "):\n"
+        for i, val := range a.data </span><span class="cov8" title="1">{
+                result += "  [" + strconv.Itoa(i) + "] = " + val + "\n"
+        }</span>
+        <span class="cov8" title="1">if len(a.data) == 0 </span><span class="cov0" title="0">{
+                result += "  (empty)\n"
+        }</span>
+        <span class="cov8" title="1">return result</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package structures
+
+import "strconv"
+
+// SNode - узел односвязного списка
+type SNode struct {
+        data string
+        next *SNode
+}
+
+// SinglyList - односвязный список
+type SinglyList struct {
+        head *SNode
+}
+
+// NewSinglyList создает новый односвязный список
+func NewSinglyList() *SinglyList <span class="cov8" title="1">{
+        return &amp;SinglyList{head: nil}
+}</span>
+
+// PushFront добавляет элемент в начало
+func (l *SinglyList) PushFront(value string) <span class="cov8" title="1">{
+        newNode := &amp;SNode{data: value, next: l.head}
+        l.head = newNode
+}</span>
+
+// PushBack добавляет элемент в конец
+func (l *SinglyList) PushBack(value string) <span class="cov8" title="1">{
+        newNode := &amp;SNode{data: value, next: nil}
+        if l.head == nil </span><span class="cov8" title="1">{
+                l.head = newNode
+                return
+        }</span>
+        <span class="cov0" title="0">current := l.head
+        for current.next != nil </span><span class="cov0" title="0">{
+                current = current.next
+        }</span>
+        <span class="cov0" title="0">current.next = newNode</span>
+}
+
+// Get возвращает элемент по индексу
+func (l *SinglyList) Get(index int) (string, bool) <span class="cov8" title="1">{
+        current := l.head
+        for i := 0; current != nil; i++ </span><span class="cov8" title="1">{
+                if i == index </span><span class="cov8" title="1">{
+                        return current.data, true
+                }</span>
+                <span class="cov8" title="1">current = current.next</span>
+        }
+        <span class="cov0" title="0">return "", false</span>
+}
+
+// Delete удаляет элемент по значению
+func (l *SinglyList) Delete(value string) bool <span class="cov8" title="1">{
+        if l.head == nil </span><span class="cov0" title="0">{
+                return false
+        }</span>
+        <span class="cov8" title="1">if l.head.data == value </span><span class="cov8" title="1">{
+                l.head = l.head.next
+                return true
+        }</span>
+        <span class="cov8" title="1">current := l.head
+        for current.next != nil </span><span class="cov0" title="0">{
+                if current.next.data == value </span><span class="cov0" title="0">{
+                        current.next = current.next.next
+                        return true
+                }</span>
+                <span class="cov0" title="0">current = current.next</span>
+        }
+        <span class="cov8" title="1">return false</span>
+}
+
+// Values возвращает все элементы списка
+func (l *SinglyList) Values() []string <span class="cov8" title="1">{
+        var values []string
+        current := l.head
+        for current != nil </span><span class="cov8" title="1">{
+                values = append(values, current.data)
+                current = current.next
+        }</span>
+        <span class="cov8" title="1">return values</span>
+}
+
+// Print выводит список
+func (l *SinglyList) Print(name string) string <span class="cov8" title="1">{
+        result := "Singly Linked List [" + name + "]:\n"
+        current := l.head
+        index := 0
+        for current != nil </span><span class="cov8" title="1">{
+                result += "  [" + strconv.Itoa(index) + "] -&gt; " + current.data + "\n"
+                current = current.next
+                index++
+        }</span>
+        <span class="cov8" title="1">if index == 0 </span><span class="cov0" title="0">{
+                result += "  (empty)\n"
+        }</span>
+        <span class="cov8" title="1">return result</span>
+}
+
+// DNode - узел двусвязного списка
+type DNode struct {
+        data string
+        next *DNode
+        prev *DNode
+}
+
+// DoublyList - двусвязный список
+type DoublyList struct {
+        head *DNode
+        tail *DNode
+}
+
+// NewDoublyList создает новый двусвязный список
+func NewDoublyList() *DoublyList <span class="cov8" title="1">{
+        return &amp;DoublyList{head: nil, tail: nil}
+}</span>
+
+// PushFront добавляет элемент в начало
+func (l *DoublyList) PushFront(value string) <span class="cov8" title="1">{
+        newNode := &amp;DNode{data: value, next: l.head, prev: nil}
+        if l.head != nil </span><span class="cov8" title="1">{
+                l.head.prev = newNode
+        }</span> else<span class="cov0" title="0"> {
+                l.tail = newNode
+        }</span>
+        <span class="cov8" title="1">l.head = newNode</span>
+}
+
+// PushBack добавляет элемент в конец
+func (l *DoublyList) PushBack(value string) <span class="cov8" title="1">{
+        newNode := &amp;DNode{data: value, next: nil, prev: l.tail}
+        if l.tail != nil </span><span class="cov8" title="1">{
+                l.tail.next = newNode
+        }</span> else<span class="cov8" title="1"> {
+                l.head = newNode
+        }</span>
+        <span class="cov8" title="1">l.tail = newNode</span>
+}
+
+// Get возвращает элемент по индексу
+func (l *DoublyList) Get(index int) (string, bool) <span class="cov8" title="1">{
+        current := l.head
+        for i := 0; current != nil; i++ </span><span class="cov8" title="1">{
+                if i == index </span><span class="cov8" title="1">{
+                        return current.data, true
+                }</span>
+                <span class="cov8" title="1">current = current.next</span>
+        }
+        <span class="cov0" title="0">return "", false</span>
+}
+
+// Delete удаляет элемент по значению
+func (l *DoublyList) Delete(value string) bool <span class="cov8" title="1">{
+        current := l.head
+        for current != nil </span><span class="cov8" title="1">{
+                if current.data == value </span><span class="cov8" title="1">{
+                        if current.prev != nil </span><span class="cov8" title="1">{
+                                current.prev.next = current.next
+                        }</span> else<span class="cov8" title="1"> {
+                                l.head = current.next
+                        }</span>
+                        <span class="cov8" title="1">if current.next != nil </span><span class="cov8" title="1">{
+                                current.next.prev = current.prev
+                        }</span> else<span class="cov8" title="1"> {
+                                l.tail = current.prev
+                        }</span>
+                        <span class="cov8" title="1">return true</span>
+                }
+                <span class="cov8" title="1">current = current.next</span>
+        }
+        <span class="cov0" title="0">return false</span>
+}
+
+// Values возвращает все элементы списка
+func (l *DoublyList) Values() []string <span class="cov8" title="1">{
+        var values []string
+        current := l.head
+        for current != nil </span><span class="cov8" title="1">{
+                values = append(values, current.data)
+                current = current.next
+        }</span>
+        <span class="cov8" title="1">return values</span>
+}
+
+// Print выводит список
+func (l *DoublyList) Print(name string) string <span class="cov8" title="1">{
+        result := "Doubly Linked List [" + name + "]:\n"
+        current := l.head
+        index := 0
+        for current != nil </span><span class="cov8" title="1">{
+                result += "  [" + strconv.Itoa(index) + "] &lt;-&gt; " + current.data + "\n"
+                current = current.next
+                index++
+        }</span>
+        <span class="cov8" title="1">if index == 0 </span><span class="cov0" title="0">{
+                result += "  (empty)\n"
+        }</span>
+        <span class="cov8" title="1">return result</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package structures
+
+import "strconv"
+
+// QueueNode - узел очереди
+type QueueNode struct {
+        data string
+        next *QueueNode
+}
+
+// Queue - очередь (FIFO)
+type Queue struct {
+        front *QueueNode
+        rear  *QueueNode
+}
+
+// NewQueue создает новую очередь
+func NewQueue() *Queue <span class="cov8" title="1">{
+        return &amp;Queue{front: nil, rear: nil}
+}</span>
+
+// Push добавляет элемент в очередь
+func (q *Queue) Push(value string) string <span class="cov8" title="1">{
+        newNode := &amp;QueueNode{data: value, next: nil}
+        if q.rear == nil </span><span class="cov8" title="1">{
+                q.front = newNode
+                q.rear = newNode
+        }</span> else<span class="cov8" title="1"> {
+                q.rear.next = newNode
+                q.rear = newNode
+        }</span>
+        <span class="cov8" title="1">return value</span>
+}
+
+// Pop удаляет и возвращает первый элемент
+func (q *Queue) Pop() (string, bool) <span class="cov8" title="1">{
+        if q.front == nil </span><span class="cov8" title="1">{
+                return "", false
+        }</span>
+        <span class="cov8" title="1">value := q.front.data
+        q.front = q.front.next
+        if q.front == nil </span><span class="cov8" title="1">{
+                q.rear = nil
+        }</span>
+        <span class="cov8" title="1">return value, true</span>
+}
+
+// IsEmpty проверяет, пуста ли очередь
+func (q *Queue) IsEmpty() bool <span class="cov8" title="1">{
+        return q.front == nil
+}</span>
+
+// Values возвращает все элементы очереди (от начала к концу)
+func (q *Queue) Values() []string <span class="cov8" title="1">{
+        var values []string
+        current := q.front
+        for current != nil </span><span class="cov0" title="0">{
+                values = append(values, current.data)
+                current = current.next
+        }</span>
+        <span class="cov8" title="1">return values</span>
+}
+
+// Print выводит очередь
+func (q *Queue) Print(name string) string <span class="cov8" title="1">{
+        result := "Queue [" + name + "] (front to rear):\n"
+        values := q.Values()
+        for i, val := range values </span><span class="cov0" title="0">{
+                result += "  [" + strconv.Itoa(i) + "] -&gt; " + val + "\n"
+        }</span>
+        <span class="cov8" title="1">if len(values) == 0 </span><span class="cov8" title="1">{
+                result += "  (empty)\n"
+        }</span>
+        <span class="cov8" title="1">return result</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package structures
+
+import "strconv"
+
+// StackNode - узел стека
+type StackNode struct {
+        data string
+        next *StackNode
+}
+
+// Stack - стек (LIFO)
+type Stack struct {
+        top *StackNode
+}
+
+// NewStack создает новый стек
+func NewStack() *Stack <span class="cov8" title="1">{
+        return &amp;Stack{top: nil}
+}</span>
+
+// Push добавляет элемент в стек
+func (s *Stack) Push(value string) string <span class="cov8" title="1">{
+        newNode := &amp;StackNode{data: value, next: s.top}
+        s.top = newNode
+        return value
+}</span>
+
+// Pop удаляет и возвращает верхний элемент
+func (s *Stack) Pop() (string, bool) <span class="cov8" title="1">{
+        if s.top == nil </span><span class="cov8" title="1">{
+                return "", false
+        }</span>
+        <span class="cov8" title="1">value := s.top.data
+        s.top = s.top.next
+        return value, true</span>
+}
+
+// IsEmpty проверяет, пуст ли стек
+func (s *Stack) IsEmpty() bool <span class="cov8" title="1">{
+        return s.top == nil
+}</span>
+
+// Values возвращает все элементы стека (от вершины к дну)
+func (s *Stack) Values() []string <span class="cov8" title="1">{
+        var values []string
+        current := s.top
+        for current != nil </span><span class="cov0" title="0">{
+                values = append(values, current.data)
+                current = current.next
+        }</span>
+        <span class="cov8" title="1">return values</span>
+}
+
+// Print выводит стек
+func (s *Stack) Print(name string) string <span class="cov8" title="1">{
+        result := "Stack [" + name + "] (top to bottom):\n"
+        current := s.top
+        index := 0
+        for current != nil </span><span class="cov0" title="0">{
+                result += "  [" + strconv.Itoa(index) + "] | " + current.data + "\n"
+                current = current.next
+                index++
+        }</span>
+        <span class="cov8" title="1">if index == 0 </span><span class="cov8" title="1">{
+                result += "  (empty)\n"
+        }</span>
+        <span class="cov8" title="1">return result</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
